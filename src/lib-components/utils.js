@@ -1,4 +1,5 @@
 import moment from 'moment'
+
 const Utils = {
   isString: function(value){
     return (typeof value === "string")
@@ -133,4 +134,5 @@ const Utils = {
 
   }
 };
+
 export default Utils
