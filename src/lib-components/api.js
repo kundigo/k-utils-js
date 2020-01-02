@@ -1,5 +1,5 @@
 import axios from 'axios'
-import Utils from './utils.js'
+import { Utils } from 'k-utils-js'
 
 
 class Api {
@@ -7,6 +7,7 @@ class Api {
   static setCSRFToken(){
     //axios.defaults.headers.common['X-CSRF-Token'] = RailsCsrfToken.get();
     axios.defaults.headers.common['Accept'] = 'application/json';
+    axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   }
 
   static setCancelToken (url) {
@@ -27,9 +28,9 @@ class Api {
     });
   }
 
-  static axiosRequest({url, data, method, onSuccess, onError, cancelToken}){
+  static axiosRequest({onSuccess, onError, ...other}){
     return new Promise((resolve) =>
-      axios({ method, url, data, cancelToken })
+      axios(other)
         .then(response => {
           onSuccess(response);
           resolve();
@@ -41,21 +42,17 @@ class Api {
     )
   }
 
-  static sendRequest ({url, data, method, onSuccess, onError, delay}) {
+  static sendRequest ({delay, url, ...other}) {
     this.setCSRFToken();
     this.setCancelToken(url);
 
     let cancelToken =  this.getCancelToken(url).token;
 
     // returning a promise is a way to mimic the complete function of JQuery, when it is needed
-    let axiosArguments = {
+    let axiosArguments = Object.assign(other, {
       url: url,
-      data: data,
-      method: method,
-      onSuccess: onSuccess,
-      onError: onError,
-      cancelToken: cancelToken
-    };
+      cancelToken: cancelToken,
+    })
 
     let delay_in_ms = 300;
 

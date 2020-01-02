@@ -1,6 +1,6 @@
 {
   "name": "k-utils-js",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "main": "dist/k-utils-js.ssr.js",
   "module": "dist/k-utils-js.esm.js",

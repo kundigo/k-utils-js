@@ -1,4 +1,104 @@
-'use strict';Object.defineProperty(exports,'__esModule',{value:true});function _interopDefault(e){return(e&&(typeof e==='object')&&'default'in e)?e['default']:e}var axios=_interopDefault(require('axios')),moment=_interopDefault(require('moment'));var Utils = {
+'use strict';Object.defineProperty(exports,'__esModule',{value:true});function _interopDefault(e){return(e&&(typeof e==='object')&&'default'in e)?e['default']:e}var axios=_interopDefault(require('axios')),kUtilsJs=require('k-utils-js'),moment=_interopDefault(require('moment'));function objectWithoutProperties (obj, exclude) { var target = {}; for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj, k) && exclude.indexOf(k) === -1) target[k] = obj[k]; return target; }
+
+
+var Api = function Api () {};
+
+Api.setCSRFToken = function setCSRFToken (){
+  //axios.defaults.headers.common['X-CSRF-Token'] = RailsCsrfToken.get();
+  axios.defaults.headers.common['Accept'] = 'application/json';
+  axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+};
+
+Api.setCancelToken = function setCancelToken (url) {
+  var tokenSource =this.getCancelToken(url);
+  if (!kUtilsJs.Utils.isBlank(tokenSource)) {
+    tokenSource.cancel((url + " request canceled by the user."));
+  }
+  this.cancelTokenSources[url] = axios.CancelToken.source();
+};
+
+Api.getCancelToken = function getCancelToken (url) {
+  return this.cancelTokenSources[url];
+};
+
+Api.later = function later (delay, value) {
+  return new Promise(function(resolve) {
+    setTimeout(resolve, delay, value);
+  });
+};
+
+Api.axiosRequest = function axiosRequest (ref){
+    var onSuccess = ref.onSuccess;
+    var onError = ref.onError;
+    var rest = objectWithoutProperties( ref, ["onSuccess", "onError"] );
+    var other = rest;
+
+  return new Promise(function (resolve) { return axios(other)
+      .then(function (response) {
+        onSuccess(response);
+        resolve();
+      })
+      .catch(function (response) {
+        onError(response);
+        resolve();
+      }); }
+  )
+};
+
+Api.sendRequest = function sendRequest (ref) {
+    var delay = ref.delay;
+    var url = ref.url;
+    var rest = objectWithoutProperties( ref, ["delay", "url"] );
+    var other = rest;
+
+  this.setCSRFToken();
+  this.setCancelToken(url);
+
+  var cancelToken =this.getCancelToken(url).token;
+
+  // returning a promise is a way to mimic the complete function of JQuery, when it is needed
+  var axiosArguments = Object.assign(other, {
+    url: url,
+    cancelToken: cancelToken,
+  });
+
+  var delay_in_ms = 300;
+
+  if (window && window.AppInfo && AppInfo.railsEnv === 'test') { delay_in_ms = 5; }// speeds up the tests
+
+  if (kUtilsJs.Utils.isTruthy(delay) && delay_in_ms > 0) {
+    return this.later(delay_in_ms, axiosArguments).then(this.axiosRequest)
+  } else {
+    return this.axiosRequest(axiosArguments)
+  }
+};
+
+
+Api.cancelTokenSources = {};
+Api.active = 0;
+
+// keep track of the 'active' API requests
+axios.interceptors.request.use(function (config) {
+  Api.active += 1;
+  // console.log(`Api request, opening, now ${Api.active} open requests`);
+  return config;
+}, function (error) {
+  Api.active -= 1;
+  //console.log(`Api request, error, ${Api.active} open requests`);
+  return Promise.reject(error);
+});
+
+axios.interceptors.response.use(function(response) {
+  Api.active -= 1;
+  //console.log(`Api response, closing, ${Api.active} open requests`);
+  return response;
+}, function(error) {
+  Api.active -= 1;
+  //console.log(`Api response, error, closing, ${Api.active} open requests`);
+  return Promise.reject(error);
+});
+
+window.Api = Api;var Utils = {
   isString: function(value){
     return (typeof value === "string")
   },
@@ -136,111 +236,7 @@
     }
 
   }
-};var Api = function Api () {};
-
-Api.setCSRFToken = function setCSRFToken (){
-  //axios.defaults.headers.common['X-CSRF-Token'] = RailsCsrfToken.get();
-  axios.defaults.headers.common['Accept'] = 'application/json';
-};
-
-Api.setCancelToken = function setCancelToken (url) {
-  var tokenSource =this.getCancelToken(url);
-  if (!Utils.isBlank(tokenSource)) {
-    tokenSource.cancel((url + " request canceled by the user."));
-  }
-  this.cancelTokenSources[url] = axios.CancelToken.source();
-};
-
-Api.getCancelToken = function getCancelToken (url) {
-  return this.cancelTokenSources[url];
-};
-
-Api.later = function later (delay, value) {
-  return new Promise(function(resolve) {
-    setTimeout(resolve, delay, value);
-  });
-};
-
-Api.axiosRequest = function axiosRequest (ref){
-    var url = ref.url;
-    var data = ref.data;
-    var method = ref.method;
-    var onSuccess = ref.onSuccess;
-    var onError = ref.onError;
-    var cancelToken = ref.cancelToken;
-
-  return new Promise(function (resolve) { return axios({ method: method, url: url, data: data, cancelToken: cancelToken })
-      .then(function (response) {
-        onSuccess(response);
-        resolve();
-      })
-      .catch(function (response) {
-        onError(response);
-        resolve();
-      }); }
-  )
-};
-
-Api.sendRequest = function sendRequest (ref) {
-    var url = ref.url;
-    var data = ref.data;
-    var method = ref.method;
-    var onSuccess = ref.onSuccess;
-    var onError = ref.onError;
-    var delay = ref.delay;
-
-  this.setCSRFToken();
-  this.setCancelToken(url);
-
-  var cancelToken =this.getCancelToken(url).token;
-
-  // returning a promise is a way to mimic the complete function of JQuery, when it is needed
-  var axiosArguments = {
-    url: url,
-    data: data,
-    method: method,
-    onSuccess: onSuccess,
-    onError: onError,
-    cancelToken: cancelToken
-  };
-
-  var delay_in_ms = 300;
-
-  if (window && window.AppInfo && AppInfo.railsEnv === 'test') { delay_in_ms = 5; }// speeds up the tests
-
-  if (Utils.isTruthy(delay) && delay_in_ms > 0) {
-    return this.later(delay_in_ms, axiosArguments).then(this.axiosRequest)
-  } else {
-    return this.axiosRequest(axiosArguments)
-  }
-};
-
-
-Api.cancelTokenSources = {};
-Api.active = 0;
-
-// keep track of the 'active' API requests
-axios.interceptors.request.use(function (config) {
-  Api.active += 1;
-  // console.log(`Api request, opening, now ${Api.active} open requests`);
-  return config;
-}, function (error) {
-  Api.active -= 1;
-  //console.log(`Api request, error, ${Api.active} open requests`);
-  return Promise.reject(error);
-});
-
-axios.interceptors.response.use(function(response) {
-  Api.active -= 1;
-  //console.log(`Api response, closing, ${Api.active} open requests`);
-  return response;
-}, function(error) {
-  Api.active -= 1;
-  //console.log(`Api response, error, closing, ${Api.active} open requests`);
-  return Promise.reject(error);
-});
-
-window.Api = Api;/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Api: Api,Utils: Utils});// Import vue components
+};/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Api: Api,Utils: Utils});// Import vue components
 
 // install function executed by Vue.use()
 function install(Vue) {
