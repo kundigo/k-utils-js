@@ -132,6 +132,10 @@ const Utils = {
       return 0;
     }
 
+  },
+
+  dotify: function (str) {
+    return (str.replace(/\[/g, '.').replace(/]/g,''))
   }
 };
 
