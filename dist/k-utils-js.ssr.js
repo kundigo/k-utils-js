@@ -235,6 +235,10 @@ window.Api = Api;var Utils = {
       return 0;
     }
 
+  },
+
+  dotify: function (str) {
+    return (str.replace(/\[/g, '.').replace(/]/g,''))
   }
 };/* eslint-disable import/prefer-default-export */var components=/*#__PURE__*/Object.freeze({__proto__:null,Api: Api,Utils: Utils});// Import vue components
 
