@@ -3,8 +3,12 @@
 
 var Api = function Api () {};
 
-Api.setCSRFToken = function setCSRFToken (){
-  //axios.defaults.headers.common['X-CSRF-Token'] = RailsCsrfToken.get();
+Api.setDefaultHeaders = function setDefaultHeaders (){
+  var csrfMetaTag = document.querySelector('meta[name="csrf-token"]');
+
+  if(csrfMetaTag) {
+    axios.defaults.headers.common['X-CSRF-Token'] =csrfMetaTag.content;
+  }
   axios.defaults.headers.common['Accept'] = 'application/json';
   axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 };
@@ -51,7 +55,7 @@ Api.sendRequest = function sendRequest (ref) {
     var rest = objectWithoutProperties( ref, ["delay", "url"] );
     var other = rest;
 
-  this.setCSRFToken();
+  this.setDefaultHeaders();
   this.setCancelToken(url);
 
   var cancelToken =this.getCancelToken(url).token;
@@ -72,7 +76,6 @@ Api.sendRequest = function sendRequest (ref) {
     return this.axiosRequest(axiosArguments)
   }
 };
-
 
 Api.cancelTokenSources = {};
 Api.active = 0;
