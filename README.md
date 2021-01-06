@@ -65,11 +65,10 @@ Notes
 ### How to use
 
     Api.sendRequest({
-        url: "/path/to/back/end",   # mandatory
-
-        onSuccess: function              # callback to be executed if the request succeeds (mandatory)
-        onError: function                # callback to be executed if the request fails (mandatory)
-        delay: true/false                # optional (see above)
+        url: "/path/to/back/end",        // mandatory
+        onSuccess: function              // callback to be executed if the request succeeds (mandatory)
+        onError: function                // callback to be executed if the request fails (mandatory)
+        delay: true/false                // optional (see above)
         // any other parameter is sent directly to axios instance
         // see [Axios Request Config documentation](https://github.com/axios/axios#request-config) 
         // for additional parameters
