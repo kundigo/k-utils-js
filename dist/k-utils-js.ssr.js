@@ -68,7 +68,7 @@ Api.sendRequest = function sendRequest (ref) {
 
   var delay_in_ms = 300;
 
-  if (window && window.AppInfo && AppInfo.railsEnv === 'test') { delay_in_ms = 5; }// speeds up the tests
+  if (window && window.AppInfo && AppInfo.railsEnv === 'test') { delay_in_ms = 0; }// speeds up the tests
 
   if (kUtilsJs.Utils.isTruthy(delay) && delay_in_ms > 0) {
     return this.later(delay_in_ms, axiosArguments).then(this.axiosRequest)
