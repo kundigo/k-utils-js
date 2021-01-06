@@ -1,0 +1,24 @@
+
+# .github/workflows/create_pull_requests.yml
+name: "Create PR for each new branch"
+on:
+  create:
+    branches:
+      - "*"  # Support wildcard matching!
+
+jobs:
+  pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: pull-request
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ""
+          destination_branch: "master"
+          pr_title: "Pulling ${{ github.ref }} into master"
+          pr_body: ":crown: *An automated PR* (please update this description before merging)"
+          pr_label: "auto-pr"
+          pr_draft: true
+          pr_allow_empty: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
