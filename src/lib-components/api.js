@@ -4,8 +4,12 @@ import { Utils } from 'k-utils-js'
 
 class Api {
 
-  static setCSRFToken(){
-    //axios.defaults.headers.common['X-CSRF-Token'] = RailsCsrfToken.get();
+  static setDefaultHeaders(){
+    let csrfMetaTag = document.querySelector('meta[name="csrf-token"]')
+
+    if(csrfMetaTag) {
+      axios.defaults.headers.common['X-CSRF-Token'] =csrfMetaTag.content;
+    }
     axios.defaults.headers.common['Accept'] = 'application/json';
     axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
   }
@@ -43,7 +47,7 @@ class Api {
   }
 
   static sendRequest ({delay, url, ...other}) {
-    this.setCSRFToken();
+    this.setDefaultHeaders();
     this.setCancelToken(url);
 
     let cancelToken =  this.getCancelToken(url).token;
@@ -56,7 +60,7 @@ class Api {
 
     let delay_in_ms = 300;
 
-    if (window && window.AppInfo && AppInfo.railsEnv === 'test') { delay_in_ms = 5 }  // speeds up the tests
+    if (window && window.AppInfo && AppInfo.railsEnv === 'test') { delay_in_ms = 0 }  // speeds up the tests
 
     if (Utils.isTruthy(delay) && delay_in_ms > 0) {
       return this.later(delay_in_ms, axiosArguments).then(this.axiosRequest)
@@ -65,7 +69,6 @@ class Api {
     }
   }
 }
-
 
 Api.cancelTokenSources = {};
 Api.active = 0;

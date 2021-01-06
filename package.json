@@ -1,6 +1,6 @@
 {
   "name": "k-utils-js",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "dist/k-utils-js.ssr.js",
   "module": "dist/k-utils-js.esm.js",
@@ -18,7 +18,7 @@
     "build:unpkg": "cross-env NODE_ENV=production rollup --config build/rollup.config.js --format iife"
   },
   "dependencies": {
-    "axios": "^0.19.0",
+    "axios": "^0.21.1",
     "moment": "^2.24.0"
   },
   "devDependencies": {
