@@ -62,11 +62,25 @@ We can also indicate if we want our request to be delayed in favor of a a future
 Notes
 * the delay buffer is 300 ms (currently hardcoded)
 
-   
+### How to use
+
+    Api.sendRequest({
+        url: "/path/to/back/end",   # mandatory
+
+        onSuccess: function              # callback to be executed if the request succeeds (mandatory)
+        onError: function                # callback to be executed if the request fails (mandatory)
+        delay: true/false                # optional (see above)
+        // any other parameter is sent directly to axios instance
+        // see [Axios Request Config documentation](https://github.com/axios/axios#request-config) 
+        // for additional parameters
+    });
 
 
 
 ## The `Utils` utility
+
+This utility contains a bunch of small functions. 
+See [utils.js](src/lib-components/utils.js)
 
 
 # Updating
