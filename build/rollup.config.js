@@ -10,6 +10,7 @@ import babel from '@rollup/plugin-babel';
 import PostCSS from 'rollup-plugin-postcss';
 import { terser } from 'rollup-plugin-terser';
 import minimist from 'minimist';
+import json from '@rollup/plugin-json';
 
 // Get browserslist config and remove ie from es build targets
 const esbrowserslist = fs.readFileSync('./.browserslistrc')
@@ -57,6 +58,7 @@ const baseConfig = {
       // Process all `<style>` blocks except `<style module>`.
       PostCSS({ include: /(?<!&module=.*)\.css$/ }),
       commonjs(),
+      json()
     ],
     babel: {
       exclude: 'node_modules/**',
