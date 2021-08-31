@@ -1,35 +1,13 @@
-// Import vue components
-import * as components from './lib-components/index';
+// iife/cjs usage extends esm default export - so import it all
+import plugin, * as components from '@/entry.esm';
 
-// install function executed by Vue.use()
-function install(Vue) {
-  if (install.installed) return;
-  install.installed = true;
-  Object.keys(components).forEach((componentName) => {
-    Vue.component(componentName, components[componentName]);
-  });
-}
+// Attach named exports directly to plugin. IIFE/CJS will
+// only expose one global var, with component exports exposed as properties of
+// that global var (eg. plugin.component)
+Object.entries(components).forEach(([componentName, component]) => {
+  if (componentName !== 'default') {
+    plugin[componentName] = component;
+  }
+});
 
-// Create module definition for Vue.use()
-const plugin = {
-  install,
-};
-
-// To auto-install when vue is found
-/* global window global */
-let GlobalVue = null;
-if (typeof window !== 'undefined') {
-  GlobalVue = window.Vue;
-} else if (typeof global !== 'undefined') {
-  GlobalVue = global.Vue;
-}
-if (GlobalVue) {
-  GlobalVue.use(plugin);
-}
-
-// Default export is library as a whole, registered via Vue.use()
 export default plugin;
-
-// To allow individual component use, export components
-// each can be registered via Vue.component()
-export * from './lib-components/index';
